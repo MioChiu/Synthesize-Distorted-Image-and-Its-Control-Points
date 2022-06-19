@@ -15,7 +15,6 @@ import collections
 import json
 import numpy as np
 import scipy.io as io
-import scipy.misc as m
 import matplotlib.pyplot as plt
 import glob
 import math
@@ -44,16 +43,16 @@ class perturbed(utils.BasePerturbed):
 
 		origin_img = cv2.imread(self.path, flags=cv2.IMREAD_COLOR)
 
-		save_img_shape = [512*2, 480*2]		# 320
+		save_img_shape = [512, 512]		# 320
 		# reduce_value = np.random.choice([2**4, 2**5, 2**6, 2**7, 2**8], p=[0.01, 0.1, 0.4, 0.39, 0.1])
-		reduce_value = np.random.choice([2*2, 4*2, 8*2, 16*2, 24*2, 32*2, 40*2, 48*2], p=[0.02, 0.18, 0.2, 0.3, 0.1, 0.1, 0.08, 0.02])
+		reduce_value = np.random.choice([1*2, 2*2, 4*2, 6*2, 8*2], p=[0.05, 0.2, 0.25, 0.35, 0.15])
 		# reduce_value = np.random.choice([8*2, 16*2, 24*2, 32*2, 40*2, 48*2], p=[0.01, 0.02, 0.2, 0.4, 0.19, 0.18])
 		# reduce_value = np.random.choice([16, 24, 32, 40, 48, 64], p=[0.01, 0.1, 0.2, 0.4, 0.2, 0.09])
 		base_img_shrink = save_img_shape[0] - reduce_value
 
 		# enlarge_img_shrink = [1024, 768]
 		# enlarge_img_shrink = [896, 672]		# 420
-		enlarge_img_shrink = [512*4, 480*4]	# 420
+		enlarge_img_shrink = [640, 640]	# 420
 		# enlarge_img_shrink = [896*2, 768*2]		# 420
 		# enlarge_img_shrink = [896, 768]		# 420
 		# enlarge_img_shrink = [768, 576]		# 420
@@ -63,7 +62,7 @@ class perturbed(utils.BasePerturbed):
 		im_lr = origin_img.shape[0]
 		im_ud = origin_img.shape[1]
 
-		reduce_value_v2 = np.random.choice([2*2, 4*2, 8*2, 16*2, 24*2, 28*2, 32*2, 48*2], p=[0.02, 0.18, 0.2, 0.2, 0.1, 0.1, 0.1, 0.1])
+		reduce_value_v2 = np.random.choice([1*2, 2*2, 4*2, 6*2, 8*2], p=[0.05, 0.2, 0.25, 0.35, 0.15])
 		# reduce_value_v2 = np.random.choice([16, 24, 28, 32, 48, 64], p=[0.01, 0.1, 0.2, 0.3, 0.25, 0.14])
 
 		if im_lr > im_ud:
@@ -224,12 +223,12 @@ class perturbed(utils.BasePerturbed):
 			# perturbed_v = np.array([random.randint(-4000, 4000) / 100, random.randint(-4000, 4000) / 100])
 			if fold_curve == 'fold' and self.is_perform(0.6, 0.4):	# self.is_perform(0.3, 0.7):
 				# perturbed_v = np.array([random.randint(-9000, 9000) / 100, random.randint(-9000, 9000) / 100])
-				perturbed_v = np.array([random.randint(-10000, 10000) / 100, random.randint(-10000, 10000) / 100])
+				perturbed_v = np.array([random.randint(-4000, 4000) / 100, random.randint(-4000, 4000) / 100])
 				# perturbed_v = np.array([random.randint(-11000, 11000) / 100, random.randint(-11000, 11000) / 100])
 			else:
 				# perturbed_v = np.array([random.randint(-9000, 9000) / 100, random.randint(-9000, 9000) / 100])
 				# perturbed_v = np.array([random.randint(-16000, 16000) / 100, random.randint(-16000, 16000) / 100])
-				perturbed_v = np.array([random.randint(-8000, 8000) / 100, random.randint(-8000, 8000) / 100])
+				perturbed_v = np.array([random.randint(-3500, 3500) / 100, random.randint(-3500, 3500) / 100])
 				# perturbed_v = np.array([random.randint(-3500, 3500) / 100, random.randint(-3500, 3500) / 100])
 				# perturbed_v = np.array([random.randint(-600, 600) / 10, random.randint(-600, 600) / 10])
 			''''''
@@ -308,7 +307,7 @@ class perturbed(utils.BasePerturbed):
 
 		'''perspective'''
 
-		perspective_shreshold = random.randint(26, 36)*10 # 280
+		perspective_shreshold = random.randint(4, 6)*10 # 280
 		x_min_per, y_min_per, x_max_per, y_max_per = self.adjust_position(perspective_shreshold, perspective_shreshold, self.new_shape[0]-perspective_shreshold, self.new_shape[1]-perspective_shreshold)
 		pts1 = np.float32([[x_min_per, y_min_per], [x_max_per, y_min_per], [x_min_per, y_max_per], [x_max_per, y_max_per]])
 		e_1_ = x_max_per - x_min_per
@@ -822,7 +821,7 @@ def xgw(args):
 	all_bgImg_path = getDatasets(bg_path)
 	global begin_train
 	begin_train = time.time()
-	fiducial_points = 61	# 31
+	fiducial_points = 17	# 31
 	process_pool = Pool(2)
 	for m, img_path in enumerate(all_img_path):
 		for n in range(args.sys_num):
@@ -834,11 +833,11 @@ def xgw(args):
 					saveFold = perturbed(img_path_, bg_path_, save_path, save_suffix)
 					saveCurve = perturbed(img_path_, bg_path_, save_path, save_suffix)
 
-					repeat_time = min(max(round(np.random.normal(12, 4)), 1), 18)
+					repeat_time = random.randint(2, 6)
 					# repeat_time = min(max(round(np.random.normal(8, 4)), 1), 12)	# random.randint(1, 2)		# min(max(round(np.random.normal(8, 4)), 1), 12)
 					process_pool.apply_async(func=saveFold.save_img, args=(m, n, 'fold', repeat_time, fiducial_points, 'relativeShift_v2'))
 
-					repeat_time = min(max(round(np.random.normal(8, 4)), 1), 13)
+					repeat_time = random.randint(2, 6)
 					# repeat_time = min(max(round(np.random.normal(6, 4)), 1), 10)
 					process_pool.apply_async(func=saveCurve.save_img, args=(m, n, 'curve', repeat_time, fiducial_points, 'relativeShift_v2'))
 
